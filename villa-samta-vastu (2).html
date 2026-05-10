@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Villa Samta – Vastu Floor Plan & 3D Model</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:#0f0e0a;color:#e8e2d8}
+button{cursor:pointer;border:none;background:none;font:inherit;color:inherit}
+
+#header{position:fixed;top:0;left:0;right:0;z-index:300;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(15,14,10,0.97);border-bottom:1px solid #2a2720;backdrop-filter:blur(12px);}
+.logo{font-family:'Playfair Display',serif;font-size:19px;color:#c9922a;letter-spacing:.02em;display:flex;align-items:center;gap:10px}
+.logo-sub{font-family:'Inter',sans-serif;font-size:10px;color:#5a5040;font-weight:500;letter-spacing:.1em;text-transform:uppercase}
+.tabs{display:flex;gap:3px;background:#1a1810;border-radius:999px;padding:3px;border:1px solid #2a2720}
+.tab{padding:6px 20px;border-radius:999px;font-size:13px;font-weight:600;color:#5a5040;transition:all .2s}
+.tab.on{background:#c9922a;color:#0f0e0a}
+.tab:hover:not(.on){color:#e8e2d8}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.icon-btn{width:34px;height:34px;border-radius:8px;background:#1a1810;border:1px solid #2a2720;display:flex;align-items:center;justify-content:center;color:#5a5040;font-size:13px;transition:all .2s}
+.icon-btn:hover{color:#e8e2d8;border-color:#c9922a}
+
+#vbar{position:fixed;top:54px;left:0;right:0;z-index:290;height:26px;background:#181506;border-bottom:1px solid #352800;font-size:10.5px;color:#8a6820;display:flex;align-items:center;gap:8px;padding:0 18px;overflow:hidden;white-space:nowrap}
+.vbadge{background:#c9922a;color:#0f0e0a;border-radius:999px;padding:1px 9px;font-size:10px;font-weight:700;flex-shrink:0;letter-spacing:.04em}
+
+.view{position:fixed;top:80px;left:0;right:0;bottom:0;display:none;overflow:hidden}
+.view.on{display:flex}
+
+/* ── FLOOR PLAN ── */
+#fp-view{flex-direction:column;background:#0c0b08}
+#fp-bar{flex-shrink:0;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:#111009;border-bottom:1px solid #252318;gap:12px}
+.ftabs{display:flex;gap:4px}
+.ftab{padding:5px 15px;border-radius:7px;font-size:12px;font-weight:600;color:#5a5040;border:1px solid #252318;transition:all .2s}
+.ftab.on{background:#c9922a;border-color:#c9922a;color:#0f0e0a}
+.ftab:hover:not(.on){color:#e8e2d8;border-color:#5a4a30}
+.zoom-ctrls{display:flex;gap:4px}
+.zbtn{width:28px;height:28px;border-radius:6px;border:1px solid #252318;color:#5a5040;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.zbtn:hover{color:#e8e2d8;border-color:#c9922a}
+.fp-legend{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.leg{display:flex;align-items:center;gap:4px;font-size:10px;color:#5a5040;white-space:nowrap}
+.leg-sw{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+#fp-body{flex:1;display:flex;min-height:0}
+#fp-scroll{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:20px;background:#0c0b08}
+#fp-svg-wrap{position:relative;flex-shrink:0;transition:transform .15s}
+#fp-panel{width:280px;flex-shrink:0;background:#111009;border-left:1px solid #252318;overflow-y:auto;padding:18px 16px}
+.phint{text-align:center;padding:48px 12px;color:#353020}
+.phint .pi{font-size:30px;margin-bottom:10px}
+.phint p{font-size:11.5px;line-height:1.7;color:#454030}
+.rcard{display:none}
+.rcard.on{display:block;animation:fi .2s ease}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.rh{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #1e1c12}
+.rh-icon{width:40px;height:40px;border-radius:9px;background:#1a1810;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.rh-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;line-height:1.2;color:#e8e2d8}
+.rh-dir{font-size:9.5px;color:#c9922a;font-weight:600;letter-spacing:.09em;text-transform:uppercase;margin-top:3px}
+.rf{margin-bottom:11px}
+.rf dt{font-size:9.5px;color:#454030;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;font-weight:600}
+.rf dd{font-size:11.5px;color:#b8b0a0;line-height:1.55}
+.vtag{display:inline-flex;align-items:center;gap:5px;margin-top:10px;padding:3px 10px;border-radius:999px;background:#0e1e08;border:1px solid #2a4a10;color:#6ab030;font-size:10px;font-weight:700}
+
+/* ── 3D MODEL ── */
+#model-view{background:#080807;position:relative}
+#three-canvas{display:block;width:100%!important;height:100%!important}
+.mui{position:absolute;pointer-events:none}
+#ftog-wrap{top:14px;left:14px;display:flex;flex-direction:column;gap:5px;pointer-events:auto}
+.ftog{display:flex;align-items:center;gap:7px;padding:5px 12px;background:rgba(15,14,10,.9);border:1px solid #2a2720;border-radius:8px;font-size:11.5px;font-weight:600;color:#5a5040;cursor:pointer;transition:all .2s;backdrop-filter:blur(10px)}
+.ftog:hover,.ftog.on{color:#e8e2d8;border-color:#c9922a}
+.ftog .d{width:7px;height:7px;border-radius:50%;background:#2a2720;transition:background .2s;flex-shrink:0}
+.ftog.on .d{background:#c9922a}
+#cam-wrap{top:14px;right:14px;display:flex;flex-direction:column;gap:5px;pointer-events:auto}
+.cbtn{width:38px;height:38px;border-radius:8px;background:rgba(15,14,10,.9);border:1px solid #2a2720;color:#5a5040;font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;backdrop-filter:blur(10px)}
+.cbtn:hover{color:#e8e2d8;border-color:#c9922a}
+#mleg-wrap{bottom:14px;left:14px;display:flex;flex-wrap:wrap;gap:5px;pointer-events:none}
+.mleg{display:flex;align-items:center;gap:5px;padding:4px 9px;background:rgba(15,14,10,.85);border:1px solid #2a2720;border-radius:999px;font-size:10.5px;color:#7a7060;backdrop-filter:blur(8px)}
+.mleg-d{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+#hint-wrap{bottom:14px;right:14px;display:flex;gap:8px;font-size:10.5px;color:#3a3525}
+kbd{background:#1a1810;border:1px solid #2a2720;border-radius:3px;padding:1px 5px;font-family:inherit;font-size:10px}
+#autorot-btn{position:absolute;bottom:46px;right:14px;pointer-events:auto}
+
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:#2a2720;border-radius:4px}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div class="logo">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <polygon points="14,3 25,13 25,26 3,26 3,13" stroke="#c9922a" stroke-width="1.4" fill="rgba(201,146,42,.12)"/>
+      <polygon points="14,3 25,13 14,13" fill="rgba(201,146,42,.3)"/>
+      <rect x="10" y="18" width="4" height="8" rx="1" fill="#c9922a"/>
+      <rect x="15" y="18" width="4" height="5" rx="1" fill="rgba(201,146,42,.45)"/>
+    </svg>
+    Villa Samta <span class="logo-sub">SF · 90×80 ft · Vastu</span>
+  </div>
+  <div class="tabs">
+    <button class="tab on" id="tab-fp" onclick="showView('fp')">⊞ Floor Plan</button>
+    <button class="tab" id="tab-3d" onclick="showView('3d')">⬡ 3D Model</button>
+  </div>
+  <div class="hdr-right">
+    <button class="icon-btn" onclick="toggleTheme()" title="Theme">☀</button>
+  </div>
+</div>
+
+<div id="vbar">
+  <span class="vbadge">✓ VASTU</span>
+  North-facing plot · Entry NE · Pooja NE (Ishan) · Kitchen SE (Agni) · Master SW (Nairitya) · Staircase W · Pool NE · Water Tank SW
+</div>
+
+<!-- FLOOR PLAN -->
+<div class="view on" id="fp-view">
+  <div id="fp-bar">
+    <div class="ftabs">
+      <button class="ftab on" id="ft-gf"   onclick="switchFloor('gf')">Ground Floor</button>
+      <button class="ftab"    id="ft-ff"   onclick="switchFloor('ff')">First Floor</button>
+      <button class="ftab"    id="ft-site" onclick="switchFloor('site')">Site Plan</button>
+    </div>
+    <div class="zoom-ctrls">
+      <button class="zbtn" onclick="zoom(1.2)" title="Zoom in">+</button>
+      <button class="zbtn" onclick="zoom(1/1.2)" title="Zoom out">−</button>
+      <button class="zbtn" onclick="zoom(0)" title="Fit">⊡</button>
+    </div>
+    <div class="fp-legend">
+      <div class="leg"><div class="leg-sw" style="background:rgba(253,220,60,.55)"></div>NE Ishan</div>
+      <div class="leg"><div class="leg-sw" style="background:rgba(239,100,50,.55)"></div>SE Agni</div>
+      <div class="leg"><div class="leg-sw" style="background:rgba(80,170,80,.5)"></div>SW Nairitya</div>
+      <div class="leg"><div class="leg-sw" style="background:rgba(130,150,255,.5)"></div>NW Vayu</div>
+      <div class="leg"><div class="leg-sw" style="background:rgba(80,210,170,.45)"></div>N/E Open</div>
+      <div class="leg"><div class="leg-sw" style="background:rgba(160,120,80,.45)"></div>Walls</div>
+    </div>
+  </div>
+  <div id="fp-body">
+    <div id="fp-scroll" onclick="handleFPClick(event)">
+      <div id="fp-svg-wrap"></div>
+    </div>
+    <div id="fp-panel">
+      <div class="phint" id="phint"><div class="pi">👆</div><p>Click any room on the plan to see full Vastu details, dimensions, colour palette & furniture placement rules</p></div>
+      <div class="rcard" id="rcard">
+        <div class="rh">
+          <div class="rh-icon" id="rc-ico"></div>
+          <div><div class="rh-name" id="rc-name"></div><div class="rh-dir" id="rc-dir"></div></div>
+        </div>
+        <dl>
+          <div class="rf"><dt>Area / Dimensions</dt><dd id="rc-dim"></dd></div>
+          <div class="rf"><dt>Vastu Element</dt><dd id="rc-elem"></dd></div>
+          <div class="rf"><dt>Colours</dt><dd id="rc-col"></dd></div>
+          <div class="rf"><dt>Furniture Placement</dt><dd id="rc-furn"></dd></div>
+          <div class="rf"><dt>Vastu Rationale</dt><dd id="rc-why"></dd></div>
+        </dl>
+        <div class="vtag" id="rc-tag">✓ Vastu Compliant</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3D MODEL -->
+<div class="view" id="model-view">
+  <canvas id="three-canvas"></canvas>
+  <div class="mui" id="ftog-wrap">
+    <button class="ftog on" id="tog-gf"   onclick="tog3('gf')"><span class="d"></span>Ground Floor</button>
+    <button class="ftog on" id="tog-ff"   onclick="tog3('ff')"><span class="d"></span>First Floor</button>
+    <button class="ftog on" id="tog-roof" onclick="tog3('roof')"><span class="d"></span>Roof & Terraces</button>
+    <button class="ftog on" id="tog-land" onclick="tog3('land')"><span class="d"></span>Landscape</button>
+  </div>
+  <div class="mui" id="cam-wrap">
+    <button class="cbtn" onclick="camReset()"  title="Reset view">⟳</button>
+    <button class="cbtn" onclick="camTop()"    title="Top view">⊤</button>
+    <button class="cbtn" onclick="camSouth()"  title="South view">↑</button>
+    <button class="cbtn" onclick="camNorth()"  title="North view">↓</button>
+    <button class="cbtn" onclick="toggleWire()" title="Wireframe">⬡</button>
+    <button class="cbtn" id="arot-btn" onclick="toggleAutoRot()" title="Auto-rotate">↺</button>
+  </div>
+  <div class="mui" id="mleg-wrap"></div>
+  <div class="mui" id="hint-wrap">
+    <span><kbd>Drag</kbd> Orbit</span>
+    <span><kbd>Scroll</kbd> Zoom</span>
+    <span><kbd>Right-drag</kbd> Pan</span>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  FLOOR PLAN DATA  (x,y in "feet", scale computed dynamically)
+//  All rooms defined with precise ft dimensions, doors & windows
+// ═══════════════════════════════════════════════════════════════
+const W=2, H=2; // wall thickness in ft
+
+// Each room: {id, name, icon, dir, x,y,w,h (ft), fill, stroke, dims, elem, col, furn, why, tag}
+// Doors: [{x,y,side:'n'|'s'|'e'|'w', width}]  Windows: same
+const GF = [
+  {id:'wc_gf',   name:'Guest WC',           icon:'🚿', dir:'North-West',
+   x:0,  y:0,  w:12, h:16,
+   fill:'rgba(110,130,255,.28)',stroke:'rgba(130,150,255,.7)',
+   doors:[{side:'e',pos:.5,w:3}],
+   wins:[{side:'n',pos:.5,w:4}],
+   dims:'12 × 16 ft  (192 sq ft)', elem:'Air / Water', col:'White, steel-grey tiles, frosted glass',
+   furn:'WC on W wall · Vanity N · Shower SW corner',
+   why:'NW placement aligns with Vayu (air) element. Bathrooms kept away from sacred NE corner.',tag:'✓ Vastu Compliant'},
+
+  {id:'stair_gf', name:'Staircase Core',    icon:'🪜', dir:'West / SW',
+   x:0,  y:16, w:12, h:22,
+   fill:'rgba(140,120,220,.28)',stroke:'rgba(160,140,230,.7)',
+   doors:[{side:'e',pos:.4,w:3}],
+   dims:'12 × 22 ft', elem:'Metal / Transition', col:'Natural kota stone, MS steel railings',
+   furn:'Clockwise ascent · 17 risers · Storage under stair',
+   why:'W/SW staircase acts as thermal buffer on hot west side, and keeps auspicious NE open.',tag:'✓ Vastu Compliant'},
+
+  {id:'foyer',   name:'Entry Foyer',         icon:'🚪', dir:'North',
+   x:12, y:0,  w:20, h:10,
+   fill:'rgba(80,210,170,.25)',stroke:'rgba(80,220,180,.7)',
+   doors:[{side:'n',pos:.5,w:5},{side:'s',pos:.5,w:4}],
+   wins:[{side:'n',pos:.2,w:4},{side:'n',pos:.8,w:4}],
+   dims:'20 × 10 ft  (200 sq ft)', elem:'Water / Prosperity', col:'Ivory stone flooring, warm teak console',
+   furn:'Shoe bench W · Deity lamp NE niche · Mirror E wall only',
+   why:'North entry channels prosperity energy. NE pedestrian gate aligns with most auspicious pada on N face.',tag:'✓ Vastu Compliant'},
+
+  {id:'pooja',   name:'Pooja & Meditation', icon:'🪔', dir:'North-East (Ishan)',
+   x:32, y:0,  w:18, h:20,
+   fill:'rgba(253,220,60,.38)',stroke:'rgba(253,230,80,.9)',
+   doors:[{side:'s',pos:.5,w:3.5}],
+   wins:[{side:'e',pos:.5,w:5},{side:'n',pos:.5,w:5}],
+   dims:'18 × 20 ft  (360 sq ft)', elem:'Ether — highest cosmic energy', col:'White marble, pale gold trim, soft yellow walls',
+   furn:'Deity shrine on E/NE wall · Devotee faces E · No overhead storage · Marble floor',
+   why:'NE (Ishan) is the meeting of North and East energies — the most sacred and auspicious corner of any Vastu plan.',tag:'✓ Vastu — Highest Compliance'},
+
+  {id:'living',  name:'Formal Living',       icon:'🛋️', dir:'North → East',
+   x:12, y:10, w:20, h:28,
+   fill:'rgba(220,170,60,.25)',stroke:'rgba(240,190,80,.7)',
+   doors:[{side:'n',pos:.5,w:4},{side:'e',pos:.5,w:4},{side:'s',pos:.7,w:4}],
+   wins:[{side:'w',pos:.5,w:8},{side:'n',pos:.5,w:8}],
+   dims:'20 × 28 ft  (560 sq ft)', elem:'Air / Morning Sun', col:'Cream walls, soft green accents, warm white ceiling',
+   furn:'Sofas on S/W walls · Seating faces N or E · TV on S wall · No heavy furniture in NE corner',
+   why:'North and East walls channel auspicious morning light. Living here energises social interaction and attracts prosperity.',tag:'✓ Vastu Compliant'},
+
+  {id:'courtyard',name:'Courtyard / Verandah',icon:'🌿',dir:'East / Centre',
+   x:32, y:20, w:10, h:18,
+   fill:'rgba(80,180,80,.2)',stroke:'rgba(100,200,100,.5)',
+   dims:'10 × 18 ft (open)', elem:'Space / Greenery', col:'Stone pavers, potted tropicals',
+   furn:'Low fountain NE · Open to sky · Potted planting · Natural cross-ventilation',
+   why:'Central east courtyard draws in eastern light and breezes — supports Ishan openness on both Vastu and thermal grounds.',tag:'✓ Vastu Compliant'},
+
+  {id:'kitchen', name:'Kitchen & Utility',   icon:'🍳', dir:'South-East (Agni)',
+   x:32, y:38, w:18, h:24,
+   fill:'rgba(239,100,50,.30)',stroke:'rgba(245,120,70,.8)',
+   doors:[{side:'w',pos:.3,w:4},{side:'s',pos:.5,w:3}],
+   wins:[{side:'e',pos:.5,w:6},{side:'n',pos:.5,w:5}],
+   dims:'18 × 24 ft  (432 sq ft)', elem:'Fire (Agni)', col:'Warm cream cabinets, terracotta/orange accents',
+   furn:'Stove on SE wall · Cook faces E · Sink NE corner of kitchen · Fridge SW',
+   why:'SE is the Agni (fire) corner — the ideal placement for kitchens in all Vastu traditions. Cook facing east ensures purity.',tag:'✓ Vastu Compliant'},
+
+  {id:'dining',  name:'Family Dining',        icon:'🍽️', dir:'South / Centre',
+   x:12, y:38, w:20, h:18,
+   fill:'rgba(180,120,60,.28)',stroke:'rgba(200,140,80,.7)',
+   doors:[{side:'n',pos:.5,w:4},{side:'e',pos:.5,w:4}],
+   wins:[{side:'s',pos:.5,w:8}],
+   dims:'20 × 18 ft  (360 sq ft)', elem:'Earth', col:'Amber wood tones, terracotta, warm white',
+   furn:'Table slightly S of centre · Head of family faces E or N · Buffet on W wall',
+   why:'South-centre dining connects kitchen and rear garden. Occupants seat facing auspicious directions during meals.',tag:'✓ Vastu Compliant'},
+
+  {id:'master_gf',name:"Parents' Bedroom",   icon:'🛏️', dir:'South-West (Nairitya)',
+   x:0,  y:38, w:12, h:24,
+   fill:'rgba(70,160,80,.30)',stroke:'rgba(90,180,100,.8)',
+   doors:[{side:'n',pos:.5,w:3.5}],
+   wins:[{side:'w',pos:.5,w:5},{side:'s',pos:.5,w:5}],
+   dims:'12 × 24 ft  (288 sq ft)', elem:'Earth / Stability', col:'Beige, warm cream, muted brown',
+   furn:'Bed headboard on S or W wall · Dresser S · Attached toilet SW · Wardrobe W wall',
+   why:'SW (Nairitya) is the stability corner — ideal for elders. The heaviest sleeping space belongs at the heaviest Vastu corner.',tag:'✓ Vastu — Highest Compliance'},
+
+  {id:'utility', name:'Service / Utility',   icon:'🔧', dir:'South-East',
+   x:32, y:62, w:18, h:8,
+   fill:'rgba(130,90,50,.22)',stroke:'rgba(150,110,70,.5)',
+   doors:[{side:'e',pos:.5,w:3}],
+   dims:'18 × 8 ft', elem:'Fire (service)', col:'Utility concrete, white tiles',
+   furn:'Washing machine NW of room · Dryer W · Service door E boundary',
+   why:'Service corridor on SE keeps heavy utility flows away from the auspicious NE Ishan corner.',tag:'✓ Vastu Compliant'},
+];
+
+const FF = [
+  {id:'stair_ff', name:'Staircase Landing', icon:'🪜', dir:'West',
+   x:0,  y:0,  w:12, h:16,
+   fill:'rgba(140,120,220,.25)',stroke:'rgba(160,140,230,.65)',
+   doors:[{side:'e',pos:.5,w:3.5}],
+   dims:'12 × 16 ft (landing)', elem:'Metal', col:'Kota stone, steel',
+   furn:'Landing bench on S wall · Storage in W alcove',
+   why:'Staircase continues in W zone maintaining consistent Vastu across both floors.',tag:'✓ Vastu Compliant'},
+
+  {id:'master_ff',name:'Master Bedroom Suite',icon:'🛏️', dir:'South-West (Nairitya)',
+   x:0,  y:16, w:26, h:30,
+   fill:'rgba(70,160,80,.30)',stroke:'rgba(90,180,100,.8)',
+   doors:[{side:'n',pos:.6,w:4}],
+   wins:[{side:'w',pos:.4,w:6},{side:'s',pos:.5,w:8},{side:'w',pos:.75,w:4}],
+   dims:'26 × 30 ft  (780 sq ft incl. dressing)', elem:'Earth / Stability', col:'Deep cream, warm taupe, muted sage green',
+   furn:'King bed SW · Headboard on S wall · Walk-in wardrobe W · Ensuite toilet SW · Reading nook E window',
+   why:'Repeating SW master on first floor reinforces earth energy and stability. Heaviest bedroom at heaviest Vastu corner.',tag:'✓ Vastu — Premium Suite'},
+
+  {id:'lounge',  name:'Family Lounge & Study',icon:'📚', dir:'North / NE',
+   x:12, y:0,  w:22, h:30,
+   fill:'rgba(80,210,170,.22)',stroke:'rgba(80,220,180,.65)',
+   doors:[{side:'s',pos:.5,w:4},{side:'e',pos:.3,w:3.5}],
+   wins:[{side:'n',pos:.3,w:8},{side:'n',pos:.75,w:6},{side:'e',pos:.5,w:5}],
+   dims:'22 × 30 ft  (660 sq ft)', elem:'Water / Air / Light', col:'Warm white, soft beige, pale green accents',
+   furn:'Sectional sofa facing E or N · Study corner NE · Bookshelves W or S · Glazed doors to N terrace',
+   why:'North/NE family lounge keeps Ishan corner alive with open, positive energy — promotes clarity and communication.',tag:'✓ Vastu Compliant'},
+
+  {id:'child2',  name:'Child Bedroom 2 / Guest',icon:'🛏️', dir:'North-West (Vayu)',
+   x:34, y:0,  w:16, h:22,
+   fill:'rgba(130,150,255,.28)',stroke:'rgba(150,170,255,.7)',
+   doors:[{side:'s',pos:.5,w:3.5}],
+   wins:[{side:'n',pos:.5,w:6},{side:'e',pos:.5,w:4}],
+   dims:'16 × 22 ft  (352 sq ft)', elem:'Air / Movement', col:'Light blue, cream, cool grey',
+   furn:'Bed head on W or S wall · Study desk facing E · Attached bath on W wall',
+   why:'NW suits guests and children — dynamic, transient Vayu energy is appropriate for changing occupancy.',tag:'✓ Vastu Compliant'},
+
+  {id:'child1',  name:'Child Bedroom 1',      icon:'🧒', dir:'South-East',
+   x:26, y:30, w:24, h:22,
+   fill:'rgba(239,100,50,.22)',stroke:'rgba(245,120,70,.65)',
+   doors:[{side:'n',pos:.4,w:3.5}],
+   wins:[{side:'e',pos:.5,w:6},{side:'s',pos:.5,w:6}],
+   dims:'24 × 22 ft  (528 sq ft)', elem:'Fire / Energy', col:'Soft blue, pastel green, warm white',
+   furn:'Bed head on S or E wall · Study desk faces E or N · Bookshelves W · Bath on W side',
+   why:'South/SE children\'s room with eastward study orientation aids concentration and academic performance.',tag:'✓ Vastu Compliant'},
+
+  {id:'bath_ff', name:'Bathrooms (×2)',        icon:'🚿', dir:'West / NW',
+   x:0,  y:46, w:26, h:8,
+   fill:'rgba(110,130,255,.22)',stroke:'rgba(130,150,255,.6)',
+   doors:[{side:'n',pos:.3,w:3},{side:'n',pos:.75,w:3}],
+   wins:[{side:'w',pos:.3,w:3},{side:'w',pos:.75,w:3}],
+   dims:'Two: ~10 × 8 ft each', elem:'Water (controlled)', col:'Warm grey stone, white fixtures, teak shelf',
+   furn:'WC on W/NW wall · Shower W · Vanity N or E wall',
+   why:'FF baths stacked over GF wet zones — W/NW placement aligns with Vastu water element rules.',tag:'✓ Vastu Compliant'},
+
+  {id:'terrace_n',name:'N Terrace Garden',    icon:'🌸', dir:'North / NE',
+   x:12, y:30, w:14, h:24,
+   fill:'rgba(80,180,80,.18)',stroke:'rgba(100,200,100,.5)',
+   wins:[{side:'n',pos:.5,w:10}],
+   dims:'~14 × 24 ft (open deck)', elem:'Space / Breeze', col:'Teak decking, tropical plants, steel pergola',
+   furn:'Outdoor lounge NW · Planters along N parapet · Pergola with climbers',
+   why:'North terrace keeps NE open to sky on the upper floor — maintains Ishan openness and captures cooling north breezes.',tag:'✓ Vastu Compliant'},
+];
+
+const SITE = [
+  {id:'s_garage',name:'Garage / Parking',    icon:'🚘', dir:'North-West',
+   x:0,  y:0,  w:20, h:20,
+   fill:'rgba(130,150,255,.22)',stroke:'rgba(150,170,255,.6)',
+   doors:[{side:'n',pos:.5,w:10}],
+   dims:'22 × 20 ft', elem:'Air / Movement', col:'Concrete, steel gate, teak panel',
+   furn:'2-car garage NW · EV charging point · Utility side door to N',
+   why:'NW garage aligns with Vayu (movement/vehicles) energy. Keeps car mass away from sacred Ishan corner.',tag:'✓ Vastu Compliant'},
+
+  {id:'s_entry',name:'Entry Court & Drive',  icon:'🚗', dir:'North',
+   x:20, y:0,  w:42, h:20,
+   fill:'rgba(80,210,170,.16)',stroke:'rgba(80,220,180,.5)',
+   dims:'42 × 20 ft', elem:'Water / Prosperity', col:'Granite pavers, tropical planting',
+   furn:'Driveway NW arc · Pedestrian path NE · Water feature NE · 2-car parking NW',
+   why:'North approach with NE pedestrian entry channels prosperity energy from the most auspicious direction.',tag:'✓ Vastu Compliant'},
+
+  {id:'s_water',name:'NE Water Feature',     icon:'💧', dir:'North-East (Ishan)',
+   x:62, y:0,  w:18, h:20,
+   fill:'rgba(253,220,60,.32)',stroke:'rgba(253,230,80,.85)',
+   dims:'~12 × 10 ft fountain', elem:'Water / Ether', col:'Natural stone bowl, lotus plants',
+   furn:'Low fountain · Lotus · Underground cistern below · Always flowing',
+   why:'Water in NE is one of the most powerful Vastu placements — brings abundance, health and positive energy into the home.',tag:'✓ Vastu — Essential Feature'},
+
+  {id:'s_house',name:'Main House Block',     icon:'🏠', dir:'Centre / S-biased',
+   x:10, y:20, w:60, h:45,
+   fill:'rgba(201,146,42,.14)',stroke:'rgba(201,146,42,.55)',
+   dims:'60 × 45 ft built footprint', elem:'Earth', col:'Sandstone cladding, white plaster, teak',
+   furn:'N setback 20 ft · S setback 15 ft · E/W setbacks 10 ft · Pushed slightly south',
+   why:'SW-biased mass keeps NE open and light. Simple rectangular form with long axis E-W reduces solar gain.',tag:'✓ Vastu Compliant'},
+
+  {id:'s_pool', name:'Swimming Pool',         icon:'🏊', dir:'NE / East',
+   x:0,  y:20, w:10, h:20,
+   fill:'rgba(60,160,240,.28)',stroke:'rgba(80,180,255,.75)',
+   dims:'30 × 14 ft pool', elem:'Water', col:'Aqua mosaic, natural stone surround',
+   furn:'Pool N-S axis · Equipment W · Lounge seating E side',
+   why:'Pool in NE/East — water element here energises the home; one of the most Vastu-recommended pool placements.',tag:'✓ Vastu Compliant'},
+
+  {id:'s_garden',name:'Rear Garden',          icon:'🌳', dir:'South',
+   x:10, y:65, w:60, h:20,
+   fill:'rgba(60,130,50,.22)',stroke:'rgba(80,160,60,.6)',
+   dims:'55 × 18 ft garden', elem:'Earth / Growth', col:'Lawn, shade trees, natural stone seating',
+   furn:'Seating centre · Kitchen garden SE corner · Service yard SE · Pergola S-centre',
+   why:'South garden green buffer; tall trees S/SW provide thermal shading and Vastu earthing energy.',tag:'✓ Vastu Compliant'},
+
+  {id:'s_svc',  name:'Service Yard & Gate',   icon:'🔧', dir:'South-East',
+   x:70, y:65, w:10, h:20,
+   fill:'rgba(239,100,50,.18)',stroke:'rgba(245,120,70,.5)',
+   dims:'12 × 16 ft yard', elem:'Fire (service)', col:'Concrete, utility fencing',
+   furn:'Service gate E · Bins W of gate · Generator SE corner',
+   why:'Heavy service and generator in SE (Agni zone). Service gate on E keeps traffic away from NE Ishan corner.',tag:'✓ Vastu Compliant'},
+
+  {id:'s_tank', name:'Overhead Tank (SW roof)',icon:'💧', dir:'South-West',
+   x:0,  y:65, w:10, h:20,
+   fill:'rgba(70,130,70,.22)',stroke:'rgba(90,150,90,.55)',
+   dims:'10 × 8 ft tank platform', elem:'Earth / Water', col:'Concrete, integrated into parapet',
+   furn:'Tank hidden behind SW parapet · Solar water heater adjacent',
+   why:'Overhead tanks in SW per Vastu — heavy mass on roof belongs at the south-west, never in NE.',tag:'✓ Vastu Compliant'},
+];
+
+const FLOOR_DATA = {gf:GF, ff:FF, site:SITE};
+const FLOOR_TITLES = {
+  gf:  'GROUND FLOOR  —  Vastu Zone Plan  |  90 ft deep × 80 ft wide plot  |  Scale ≈ 1:96',
+  ff:  'FIRST FLOOR  —  Vastu Zone Plan  |  Same orientation  |  Scale ≈ 1:96',
+  site:'SITE PLAN  —  90 ft × 80 ft Plot  |  SF, New Delhi  |  North-Facing',
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  FLOOR PLAN RENDERER
+// ═══════════════════════════════════════════════════════════════
+let curFloor = 'gf';
+let selId    = null;
+let fpScale  = 1;
+let baseScale = 7; // px per ft — computed on render
+
+function buildFP(floor) {
+  const rooms = FLOOR_DATA[floor];
+  const PAD = 56;
+  let maxX=0, maxY=0;
+  rooms.forEach(r => { maxX=Math.max(maxX,r.x+r.w); maxY=Math.max(maxY,r.y+r.h); });
+
+  const avW = document.getElementById('fp-scroll').clientWidth  - 80;
+  const avH = document.getElementById('fp-scroll').clientHeight - 80;
+  const sc  = Math.min(avW/maxX, avH/maxY, 9);
+  baseScale = sc;
+
+  const SVG_W = maxX*sc + PAD*2;
+  const SVG_H = maxY*sc + PAD*2;
+  const ox = PAD, oy = PAD;
+  const tx = x => ox + x*sc;
+  const ty = y => oy + y*sc;
+  const ts = n => n*sc;
+
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" id="fp-svg"
+    width="${SVG_W}" height="${SVG_H}"
+    style="display:block;background:#0d0c09;border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,.6)">
+    <defs>
+      <pattern id="grid" width="${ts(5)}" height="${ts(5)}" patternUnits="userSpaceOnUse"
+        patternTransform="translate(${ox},${oy})">
+        <path d="M${ts(5)} 0 L0 0 0 ${ts(5)}" fill="none" stroke="rgba(201,146,42,.05)" stroke-width=".4"/>
+      </pattern>
+      <pattern id="hatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="4" stroke="rgba(180,160,100,.35)" stroke-width="1.2"/>
+      </pattern>
+      <filter id="glow"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    <rect width="${SVG_W}" height="${SVG_H}" fill="url(#grid)" rx="10"/>`;
+
+  // Plot boundary
+  s += `<rect x="${tx(0)}" y="${ty(0)}" width="${ts(maxX)}" height="${ts(maxY)}"
+    fill="none" stroke="rgba(201,146,42,.22)" stroke-width="1" stroke-dasharray="6 3" rx="2"/>`;
+
+  // Direction labels
+  const dL = (x,y,txt,clr,rot='') =>
+    `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central"
+      font-size="10" font-weight="700" fill="${clr}" font-family="Inter,sans-serif"
+      ${rot?`transform="rotate(${rot},${x},${y})"`:''}>${txt}</text>`;
+  s += dL(tx(maxX/2), ty(0)-18, '↑ NORTH', 'rgba(220,80,60,.9)');
+  s += dL(tx(maxX/2), ty(maxY)+18, 'SOUTH ↓', 'rgba(201,146,42,.5)');
+  s += dL(tx(0)-18,   ty(maxY/2), 'WEST',  'rgba(201,146,42,.45)', '-90');
+  s += dL(tx(maxX)+18,ty(maxY/2), 'EAST',  'rgba(201,146,42,.45)', '90');
+
+  // ── Draw rooms ──
+  rooms.forEach(r => {
+    if (!r.w || !r.h) return;
+    const rx=tx(r.x), ry=ty(r.y), rw=ts(r.w), rh=ts(r.h);
+    const cx=rx+rw/2, cy=ry+rh/2;
+    const isSel = selId===r.id;
+    const fs = Math.max(7.5, Math.min(11, ts(Math.min(r.w,r.h))*0.085));
+
+    s += `<g class="fp-room${isSel?' sel':''}" id="fpr-${r.id}" data-id="${r.id}" style="cursor:pointer">`;
+
+    // Room fill
+    s += `<rect class="fill" x="${rx}" y="${ry}" width="${rw}" height="${rh}"
+      fill="${r.fill}" stroke="${r.stroke}" stroke-width="${isSel?2.5:1.4}" rx="3"
+      style="transition:opacity .15s"/>`;
+
+    // Wall hatch for exterior walls (simulate thickness)
+    s += `<rect x="${rx}" y="${ry}" width="${rw}" height="${ts(W)}"
+      fill="url(#hatch)" opacity=".5" rx="2"/>`;
+    s += `<rect x="${rx}" y="${ry}" width="${ts(W)}" height="${rh}"
+      fill="url(#hatch)" opacity=".5"/>`;
+
+    // Selected ring
+    if (isSel) s += `<rect x="${rx-2}" y="${ry-2}" width="${rw+4}" height="${rh+4}"
+      fill="none" stroke="#c9922a" stroke-width="2" stroke-dasharray="5 2" rx="4" opacity=".8"/>`;
+
+    // Door symbols
+    (r.doors||[]).forEach(d => {
+      const dw = ts(d.w), arc = dw;
+      let dx,dy,sweep,pathD,lineD;
+      if (d.side==='n') {
+        dx = rx + rw*d.pos - dw/2; dy = ry;
+        lineD = `M${dx},${dy} L${dx+dw},${dy}`;
+        pathD = `M${dx+dw},${dy} A${arc},${arc} 0 0,0 ${dx+dw},${dy+arc}`;
+        sweep = `M${dx+dw},${dy} L${dx+dw},${dy+arc}`;
+      } else if (d.side==='s') {
+        dx = rx + rw*d.pos - dw/2; dy = ry+rh;
+        lineD = `M${dx},${dy} L${dx+dw},${dy}`;
+        pathD = `M${dx},${dy} A${arc},${arc} 0 0,1 ${dx},${dy-arc}`;
+        sweep = `M${dx},${dy} L${dx},${dy-arc}`;
+      } else if (d.side==='e') {
+        dx = rx+rw; dy = ry + rh*d.pos - dw/2;
+        lineD = `M${dx},${dy} L${dx},${dy+dw}`;
+        pathD = `M${dx},${dy+dw} A${arc},${arc} 0 0,0 ${dx-arc},${dy+dw}`;
+        sweep = `M${dx},${dy+dw} L${dx-arc},${dy+dw}`;
+      } else {
+        dx = rx; dy = ry + rh*d.pos - dw/2;
+        lineD = `M${dx},${dy} L${dx},${dy+dw}`;
+        pathD = `M${dx},${dy} A${arc},${arc} 0 0,1 ${dx+arc},${dy}`;
+        sweep = `M${dx},${dy} L${dx+arc},${dy}`;
+      }
+      s += `<path d="${lineD}" stroke="rgba(201,146,42,.7)" stroke-width="2.5" fill="none"/>`;
+      s += `<path d="${pathD}" stroke="rgba(201,146,42,.4)" stroke-width=".8" fill="rgba(201,146,42,.06)" stroke-dasharray="2 1"/>`;
+      s += `<path d="${sweep}" stroke="rgba(201,146,42,.35)" stroke-width=".8" fill="none"/>`;
+    });
+
+    // Window symbols
+    (r.wins||[]).forEach(w2 => {
+      const ww=ts(w2.w);
+      let wx1,wy1,wx2,wy2, inx1,iny1,inx2,iny2;
+      const wt=3;
+      if (w2.side==='n') {
+        wx1=rx+rw*w2.pos-ww/2; wy1=ry; wx2=wx1+ww; wy2=ry;
+        s += `<rect x="${wx1}" y="${wy1-wt}" width="${ww}" height="${wt*2}"
+          fill="rgba(150,220,255,.2)" stroke="rgba(150,220,255,.6)" stroke-width=".8"/>`;
+        s += `<line x1="${(wx1+wx2)/2}" y1="${wy1-wt}" x2="${(wx1+wx2)/2}" y2="${wy1+wt}"
+          stroke="rgba(150,220,255,.5)" stroke-width=".6"/>`;
+      } else if (w2.side==='s') {
+        wx1=rx+rw*w2.pos-ww/2; wy1=ry+rh;
+        s += `<rect x="${wx1}" y="${wy1-wt}" width="${ww}" height="${wt*2}"
+          fill="rgba(150,220,255,.2)" stroke="rgba(150,220,255,.6)" stroke-width=".8"/>`;
+        s += `<line x1="${(wx1+wx1+ww)/2}" y1="${wy1-wt}" x2="${(wx1+wx1+ww)/2}" y2="${wy1+wt}"
+          stroke="rgba(150,220,255,.5)" stroke-width=".6"/>`;
+      } else if (w2.side==='e') {
+        wy1=ry+rh*w2.pos-ww/2;
+        s += `<rect x="${rx+rw-wt}" y="${wy1}" width="${wt*2}" height="${ww}"
+          fill="rgba(150,220,255,.2)" stroke="rgba(150,220,255,.6)" stroke-width=".8"/>`;
+        s += `<line x1="${rx+rw-wt}" y1="${(wy1+wy1+ww)/2}" x2="${rx+rw+wt}" y2="${(wy1+wy1+ww)/2}"
+          stroke="rgba(150,220,255,.5)" stroke-width=".6"/>`;
+      } else {
+        wy1=ry+rh*w2.pos-ww/2;
+        s += `<rect x="${rx-wt}" y="${wy1}" width="${wt*2}" height="${ww}"
+          fill="rgba(150,220,255,.2)" stroke="rgba(150,220,255,.6)" stroke-width=".8"/>`;
+        s += `<line x1="${rx-wt}" y1="${(wy1+wy1+ww)/2}" x2="${rx+wt}" y2="${(wy1+wy1+ww)/2}"
+          stroke="rgba(150,220,255,.5)" stroke-width=".6"/>`;
+      }
+    });
+
+    // Dimension lines
+    if (rw > 30) {
+      s += `<line x1="${rx+4}" y1="${ry+rh+10}" x2="${rx+rw-4}" y2="${ry+rh+10}"
+        stroke="rgba(201,146,42,.3)" stroke-width=".8"/>`;
+      s += `<text x="${cx}" y="${ry+rh+18}" text-anchor="middle"
+        font-size="8" fill="rgba(201,146,42,.55)" font-family="Inter,sans-serif">${r.w}′</text>`;
+    }
+    if (rh > 30) {
+      s += `<line x1="${rx+rw+10}" y1="${ry+4}" x2="${rx+rw+10}" y2="${ry+rh-4}"
+        stroke="rgba(201,146,42,.3)" stroke-width=".8"/>`;
+      s += `<text x="${rx+rw+20}" y="${cy}" text-anchor="middle"
+        font-size="8" fill="rgba(201,146,42,.55)" font-family="Inter,sans-serif"
+        transform="rotate(90,${rx+rw+20},${cy})">${r.h}′</text>`;
+    }
+
+    // Room label (multi-line)
+    if (rw > 28 && rh > 25) {
+      const words = r.name.split(' ');
+      const mid   = Math.ceil(words.length/2);
+      const l1    = words.slice(0,mid).join(' ');
+      const l2    = words.slice(mid).join(' ');
+      const lfs   = Math.max(7.5, Math.min(10.5, ts(Math.min(r.w,r.h))*0.09));
+      s += `<text x="${cx}" y="${cy-lfs}" text-anchor="middle" dominant-baseline="central"
+        font-size="${lfs}" font-weight="600" fill="rgba(232,226,216,.88)" font-family="Inter,sans-serif">${l1}</text>`;
+      if (l2) s += `<text x="${cx}" y="${cy+lfs*0.6}" text-anchor="middle" dominant-baseline="central"
+        font-size="${lfs}" font-weight="500" fill="rgba(232,226,216,.65)" font-family="Inter,sans-serif">${l2}</text>`;
+      if (ts(Math.min(r.w,r.h)) > 35) {
+        s += `<text x="${cx}" y="${cy-lfs*2.5}" text-anchor="middle" font-size="${Math.min(20,ts(Math.min(r.w,r.h))*.18)}"
+          font-family="sans-serif">${r.icon}</text>`;
+        // sq ft label
+        if (r.dims.includes('sq ft')) {
+          const sqft = r.dims.match(/(\d+) sq/);
+          if (sqft) s += `<text x="${cx}" y="${cy+lfs*2}" text-anchor="middle"
+            font-size="7.5" fill="rgba(201,146,42,.55)" font-family="Inter,sans-serif"
+            font-style="italic">${sqft[1]} sq ft</text>`;
+        }
+      }
+    }
+
+    s += `</g>`;
+  });
+
+  // Vastu zone labels (cardinal corners)
+  const zoneLabel = (x,y,txt,clr) =>
+    `<text x="${tx(x)}" y="${ty(y)}" text-anchor="middle"
+      font-size="9" font-weight="700" fill="${clr}" font-family="Inter,sans-serif"
+      opacity=".55" letter-spacing=".05em">${txt}</text>`;
+  s += zoneLabel(maxX*.12, maxY*.06, 'NW · VAYU',   '#8090ff');
+  s += zoneLabel(maxX*.88, maxY*.06, 'NE · ISHAN',  '#ffd830');
+  s += zoneLabel(maxX*.12, maxY*.94, 'SW · NAIRITYA','#60c060');
+  s += zoneLabel(maxX*.88, maxY*.94, 'SE · AGNI',   '#f06030');
+
+  // Compass rose
+  const cpx = SVG_W - 38, cpy = 38;
+  s += `<g transform="translate(${cpx},${cpy})">
+    <circle r="24" fill="rgba(15,14,10,.88)" stroke="rgba(201,146,42,.3)" stroke-width="1.2"/>
+    <polygon points="0,-18 -3.5,0 3.5,0" fill="rgba(220,70,50,.9)"/>
+    <polygon points="0,18  -3.5,0 3.5,0" fill="rgba(201,146,42,.45)"/>
+    <text y="-20" text-anchor="middle" font-size="8.5" fill="rgba(220,70,50,.95)" font-weight="700" font-family="Inter,sans-serif">N</text>
+    <text y="26"  text-anchor="middle" font-size="7.5" fill="rgba(201,146,42,.55)" font-family="Inter,sans-serif">S</text>
+    <text x="-22" y="3.5" text-anchor="middle" font-size="7.5" fill="rgba(201,146,42,.55)" font-family="Inter,sans-serif">W</text>
+    <text x="22"  y="3.5" text-anchor="middle" font-size="7.5" fill="rgba(201,146,42,.55)" font-family="Inter,sans-serif">E</text>
+  </g>`;
+
+  // Scale bar
+  const sbX = PAD, sbY = SVG_H - 14;
+  const sbFt = floor==='site' ? 20 : 10;
+  s += `<line x1="${sbX}" y1="${sbY}" x2="${sbX+ts(sbFt)}" y2="${sbY}"
+    stroke="rgba(201,146,42,.5)" stroke-width="2"/>`;
+  s += `<line x1="${sbX}" y1="${sbY-3}" x2="${sbX}" y2="${sbY+3}"
+    stroke="rgba(201,146,42,.5)" stroke-width="1.5"/>`;
+  s += `<line x1="${sbX+ts(sbFt)}" y1="${sbY-3}" x2="${sbX+ts(sbFt)}" y2="${sbY+3}"
+    stroke="rgba(201,146,42,.5)" stroke-width="1.5"/>`;
+  s += `<text x="${sbX+ts(sbFt)/2}" y="${sbY-5}" text-anchor="middle"
+    font-size="8" fill="rgba(201,146,42,.55)" font-family="Inter,sans-serif">${sbFt} ft</text>`;
+
+  // Title
+  s += `<text x="${SVG_W/2}" y="${SVG_H-4}" text-anchor="middle"
+    font-size="8.5" fill="rgba(201,146,42,.35)" font-family="Inter,sans-serif"
+    letter-spacing=".04em">${FLOOR_TITLES[floor]}</text>`;
+
+  s += `</svg>`;
+  return s;
+}
+
+function renderFP() {
+  document.getElementById('fp-svg-wrap').innerHTML = buildFP(curFloor);
+  fpScale = 1;
+  document.getElementById('fp-svg-wrap').style.transform = `scale(1)`;
+}
+
+function switchFloor(f) {
+  curFloor = f; selId = null;
+  ['gf','ff','site'].forEach(x =>
+    document.getElementById('ft-'+x).classList.toggle('on', x===f));
+  document.getElementById('phint').style.display = 'block';
+  document.getElementById('rcard').classList.remove('on');
+  renderFP();
+}
+
+function zoom(factor) {
+  if (factor === 0) { fpScale=1; }
+  else { fpScale = Math.max(0.4, Math.min(3, fpScale*factor)); }
+  document.getElementById('fp-svg-wrap').style.transform = `scale(${fpScale})`;
+  document.getElementById('fp-svg-wrap').style.transformOrigin = 'center center';
+}
+
+function handleFPClick(e) {
+  const g = e.target.closest('.fp-room');
+  if (!g) return;
+  const id = g.dataset.id;
+  selectRoom(id);
+}
+
+function selectRoom(id) {
+  const all = [...GF,...FF,...SITE];
+  const r = all.find(x=>x.id===id);
+  if (!r) return;
+  selId = id;
+  renderFP(); // re-render with selection
+  document.getElementById('phint').style.display='none';
+  document.getElementById('rc-ico').textContent  = r.icon;
+  document.getElementById('rc-name').textContent = r.name;
+  document.getElementById('rc-dir').textContent  = r.dir;
+  document.getElementById('rc-dim').textContent  = r.dims;
+  document.getElementById('rc-elem').textContent = r.elem;
+  document.getElementById('rc-col').textContent  = r.col;
+  document.getElementById('rc-furn').textContent = r.furn;
+  document.getElementById('rc-why').textContent  = r.why;
+  document.getElementById('rc-tag').textContent  = r.tag;
+  document.getElementById('rcard').classList.add('on');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  THREE.JS 3D MODEL
+// ═══════════════════════════════════════════════════════════════
+let R, scene, cam, groups={}, vis={gf:true,ff:true,roof:true,land:true};
+let drag=false, rDrag=false, lastM={x:0,y:0};
+let sph={phi:1.05,theta:-0.6,r:140}, pan={x:0,y:10};
+let wireMode=false, autoRot=false, animId=null;
+let threeReady=false, threeInited=false;
+
+const MAT_DEFS = [
+  {label:'Living / Formal',  hex:'#e8c468', c:0xe8c468},
+  {label:'Bedrooms',         hex:'#8ec890', c:0x8ec890},
+  {label:'Kitchen',          hex:'#e07040', c:0xe07040},
+  {label:'Pooja / Sacred',   hex:'#f5e050', c:0xf5e050},
+  {label:'Bathrooms',        hex:'#8898d8', c:0x8898d8},
+  {label:'Staircase',        hex:'#a898d0', c:0xa898d0},
+  {label:'Terrace',          hex:'#68c880', c:0x68c880},
+  {label:'Sandstone Wall',   hex:'#c8b070', c:0xc8b070},
+];
+
+function M(c, r=0.78, m=0.06) { return new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m}); }
+function Mt(c, o, r=0.7)      { return new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:0,transparent:true,opacity:o}); }
+
+function addBox(g,x,y,z,w,h,d,mat) {
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat);
+  mesh.position.set(x, y+h/2, z);
+  mesh.castShadow = mesh.receiveShadow = true;
+  g.add(mesh); return mesh;
+}
+function addFlat(g,x,z,w,d,col,yy=0.05) {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w,d),
+    new THREE.MeshLambertMaterial({color:col}));
+  m.rotation.x=-Math.PI/2; m.position.set(x,yy,z);
+  m.receiveShadow=true; g.add(m);
+}
+function addPergola(g,cx,yBase,cz,w,h) {
+  const bM=M(0x4a2808,0.75);
+  [[-w/2,-3.5],[w/2,-3.5],[-w/2,3.5],[w/2,3.5]].forEach(([px,pz])=>addBox(g,cx+px,yBase,cz+pz,.5,h,.5,bM));
+  for(let b=-2;b<=2;b++) addBox(g,cx,yBase+h,cz+b*2,w+1,.28,.28,bM);
+}
+function addTree(g,x,z) {
+  addBox(g,x,0,z, 0.9,4.5,0.9, M(0x5a3818,0.9));
+  const c=new THREE.Mesh(new THREE.SphereGeometry(3,8,6),M(0x2c5820,0.92));
+  c.position.set(x,7,z); c.castShadow=true; g.add(c);
+}
+function addWall(g,x,y,z,w,h,d,mat) { return addBox(g,x,y,z,w,h,d,mat); }
+
+function buildScene() {
+  // ── LANDSCAPE ───────────────────────────────────────────────
+  const LG=new THREE.Group(); groups.land=LG; scene.add(LG);
+  addFlat(LG,0,0,82,92,0x131810);
+  addFlat(LG,0,0,80,90,0x1c2212,0.06);
+  addFlat(LG,0,-34,60,20,0x252018,0.07); // front court
+  addFlat(LG,0,38,62,16,0x1a2410,0.07);  // rear garden
+  // Pool NE
+  const pWat=new THREE.Mesh(new THREE.PlaneGeometry(16,10),
+    new THREE.MeshStandardMaterial({color:0x1858b0,roughness:.05,metalness:.2,transparent:true,opacity:.88}));
+  pWat.rotation.x=-Math.PI/2; pWat.position.set(28,-26,.32); LG.add(pWat);
+  addBox(LG,28,.0,-26,17.5,.55,11.5,M(0x7888a0,.9));
+  // Boundary walls
+  addBox(LG,0,0,-45,80,1.4,.45,M(0x3a3020));
+  addBox(LG,0,0, 45,80,1.4,.45,M(0x3a3020));
+  addBox(LG,-40,0,0,.45,1.4,90,M(0x3a3020));
+  addBox(LG, 40,0,0,.45,1.4,90,M(0x3a3020));
+  // Gate pillars NE
+  addBox(LG,22,0,-45,2.2,3.2,2.2,M(0x5a4820));
+  addBox(LG,30,0,-45,2.2,3.2,2.2,M(0x5a4820));
+  // Trees
+  [[-32,-30],[-32,0],[-32,28],[32,-30],[32,0],[32,28],[0,40],[-14,40],[14,40],[-22,-38],[22,-38]].forEach(([x,z])=>addTree(LG,x,z));
+  // Driveway stones
+  addFlat(LG,-16,-36,24,18,0x201c14,.08);
+
+  const GFH=10, GFY=0;
+  const SLAB_Y = 0.55;
+
+  // ── GROUND FLOOR ────────────────────────────────────────────
+  const GF=new THREE.Group(); groups.gf=GF; scene.add(GF);
+
+  // Floor slab
+  addBox(GF,0,GFY,-5,62,SLAB_Y,47,M(0x3a3020));
+
+  // Exterior walls — sandstone
+  const extM=M(0xc8b478,.82,.04), stoneM=M(0xb09860,.80,.04), plsM=M(0xe8e0d0,.88);
+  addWall(GF, 0,SLAB_Y,-30,   62,.8,  GFH, extM);  // N facade
+  addWall(GF, 0,SLAB_Y, 18,   62,.8,  GFH, extM);  // S facade
+  addWall(GF,-31,SLAB_Y,-5,  .8,GFH,48,  stoneM); // W stone
+  addWall(GF, 31,SLAB_Y,-5,  .8,GFH,48,  extM);   // E
+
+  // Stone accent panels W facade
+  addWall(GF,-30.5,SLAB_Y,4, .5,GFH,12, stoneM);
+  addWall(GF,-30.5,SLAB_Y,-18,.5,GFH,10,stoneM);
+
+  // Interior walls
+  const iM=M(0xd0c8a8,.88);
+  addWall(GF,-10,SLAB_Y,-5,  .45,GFH,48, iM); // main NS
+  addWall(GF, 11,SLAB_Y,-8,  42,.45,GFH, iM); // EW split
+  addWall(GF, 20,SLAB_Y, 5,  .45,GFH,26, iM); // kitchen E wall
+  addWall(GF, 0, SLAB_Y, 5,  20,.45,GFH, iM); // dining N wall
+
+  // Room volumes (semi-transparent)
+  addBox(GF, 11,SLAB_Y,-20, 38,GFH-.4,32, Mt(0xe8c468,.22)); // living
+  addBox(GF, 23,SLAB_Y,-25, 14,GFH-.4, 8, Mt(0xf5e050,.30)); // pooja
+  addBox(GF, 23,SLAB_Y,  9, 18,GFH-.4,14, Mt(0xe07040,.25)); // kitchen
+  addBox(GF,  8,SLAB_Y,  9, 24,GFH-.4,14, Mt(0xd0a060,.22)); // dining
+  addBox(GF,-18,SLAB_Y,  5, 22,GFH-.4,20, Mt(0x8ec890,.25)); // master
+  addBox(GF,-24,SLAB_Y,-12, 10,GFH-.4,20, Mt(0xa898d0,.25)); // stair
+  addBox(GF,-24,SLAB_Y,-24, 10,GFH-.4,10, Mt(0x8898d8,.22)); // wc
+
+  // Glazing
+  const glM=new THREE.MeshStandardMaterial({color:0x88c8e8,roughness:.04,metalness:.12,transparent:true,opacity:.42});
+  [-16,-4,8,20].forEach(wx=>{
+    const g2=new THREE.Mesh(new THREE.BoxGeometry(5,4.5,.22),glM);
+    g2.position.set(wx,SLAB_Y+GFH*.55,-30.6); GF.add(g2);
+  });
+  [-18,-4,8].forEach(wz=>{
+    const g2=new THREE.Mesh(new THREE.BoxGeometry(.22,4.5,5.5),glM);
+    g2.position.set(31.6,SLAB_Y+GFH*.55,wz); GF.add(g2);
+  });
+
+  // Main entrance door
+  addBox(GF,10,SLAB_Y,-30.3,3.8,7.5,.3,M(0x5a3808,.72));
+  // Entry canopy slab
+  addBox(GF,10,SLAB_Y+GFH,-29.5, 14,.4,6, M(0xc8b070,.8));
+  // Canopy columns
+  [[-5,-28],[5,-28]].forEach(([cx2,cz2])=>addBox(GF,10+cx2,SLAB_Y,-28,.4,GFH,.4,M(0xb0a060)));
+  // Entry steps
+  for(let i=0;i<3;i++) addBox(GF,10,i*.5,-32+i*.7, 8,.4,1,M(0xb0a070));
+
+  // E side pergola
+  addPergola(GF,22,SLAB_Y+GFH,-12,14,2.4);
+
+  // Roof slab GF (= FF floor)
+  addBox(GF,0,SLAB_Y+GFH,-5, 62,.45,47, M(0x4a4028));
+
+  // ── FIRST FLOOR ─────────────────────────────────────────────
+  const FFY = SLAB_Y+GFH+.45, FFH=10;
+  const FF=new THREE.Group(); groups.ff=FF; scene.add(FF);
+
+  addWall(FF, 0,FFY,-30, 62,.8,FFH, plsM);    // N white plaster
+  addWall(FF, 0,FFY, 18, 62,.8,FFH, extM);    // S sandstone
+  addWall(FF,-31,FFY,-5, .8,FFH,48, stoneM);  // W stone
+  addWall(FF, 31,FFY,-5, .8,FFH,48, plsM);    // E plaster
+
+  // Stone cladding accent columns W
+  addWall(FF,-30.5,FFY,-16, .5,FFH,10, stoneM);
+  addWall(FF,-30.5,FFY, 6,  .5,FFH, 8, stoneM);
+
+  // Interior FF
+  addWall(FF,-10,FFY,-5,  .45,FFH,48, iM);
+  addWall(FF, 6, FFY,-5,  32, .45,FFH, iM);
+  addWall(FF, 26,FFY, 4,  .45,FFH,22, iM);
+
+  // Room volumes FF
+  addBox(FF,-17,FFY,-3,  22,FFH-.4,42, Mt(0x8ec890,.24)); // master SW
+  addBox(FF, 12,FFY, 3,  40,FFH-.4,28, Mt(0xe8c468,.22)); // family lounge N
+  addBox(FF, 21,FFY,-20, 20,FFH-.4,20, Mt(0x88c0b8,.24)); // child 2 NW
+  addBox(FF, 12,FFY, 10, 38,FFH-.4,14, Mt(0x8898d8,.20)); // child 1 S
+  addBox(FF,-24,FFY,-12, 10,FFH-.4,20, Mt(0xa898d0,.25)); // stair
+
+  // FF glazing
+  [-16,-4,8,20].forEach(wx=>{
+    const g2=new THREE.Mesh(new THREE.BoxGeometry(5,4.5,.22),glM);
+    g2.position.set(wx,FFY+FFH*.55,-30.6); FF.add(g2);
+  });
+  // Large glazed wall family lounge E
+  const bW=new THREE.Mesh(new THREE.BoxGeometry(.22,6.5,18),glM);
+  bW.position.set(31.6,FFY+FFH*.5,-14); FF.add(bW);
+
+  // N balcony terrace
+  addBox(FF, 8,FFY+FFH+.2,-30, 40,.4,8,  M(0x908060,.8));
+  addBox(FF, 8,FFY+FFH+.6,-34, 40,1.2,.22, M(0xa09060));    // parapet
+  addPergola(FF,8,FFY+FFH+.6,-33,24,2.6);
+
+  // Stepped terrace E side
+  addBox(FF,26,FFY+FFH+.2,-22, 18,.4,12, M(0x908060,.8));
+  addBox(FF,22,FFY+FFH+.6,-28, 18,1.2,.22, M(0xa09060));
+
+  // FF roof slab
+  addBox(FF,4,FFY+FFH+.2,-2, 52,.45,32, M(0x484028));
+
+  // ── ROOF ────────────────────────────────────────────────────
+  const RFY=FFY+FFH+.65, RF=new THREE.Group(); groups.roof=RF; scene.add(RF);
+
+  // SW terrace
+  addBox(RF,-14,RFY,1, 30,.35,30, M(0x7a7050,.8));
+  addBox(RF,-14,RFY,-15,30,1.2,.3,M(0x9a9070)); // parapets
+  addBox(RF,-14,RFY, 15,30,1.2,.3,M(0x9a9070));
+  addBox(RF,-29,RFY,  1,.3,1.2,30,M(0x9a9070));
+  addBox(RF, -1,RFY,  1,.3,1.2,30,M(0x9a9070));
+  addPergola(RF,-14,RFY+1.2,1,16,2.8);
+
+  // Water tank SW (hidden)
+  addBox(RF,-24,RFY+1.2,8, 8,3.2,6, M(0x4a5830,.85));
+  // Solar panels
+  addBox(RF,6,RFY+1.6,0, 20,.15,13,
+    new THREE.MeshStandardMaterial({color:0x18305a,roughness:.25,metalness:.6}));
+  // Skylight
+  const skM=new THREE.MeshStandardMaterial({color:0x90c8e8,transparent:true,opacity:.28,roughness:.08});
+  const sk=new THREE.Mesh(new THREE.BoxGeometry(16,.2,14),skM);
+  sk.position.set(14,RFY+.1,-5); RF.add(sk);
+  // Green roof patches
+  addBox(RF,-14,RFY+1.2,-9, 8,.7,2.5,M(0x4a7028));
+  addBox(RF,-8, RFY+1.2, 4, 4,.7,4,  M(0x4a7028));
+}
+
+function updateCam() {
+  const {phi,theta,r}=sph;
+  cam.position.set(
+    pan.x + r*Math.sin(phi)*Math.cos(theta),
+    r*Math.cos(phi),
+    pan.y + r*Math.sin(phi)*Math.sin(theta)
+  );
+  cam.lookAt(pan.x, 10, pan.y);
+}
+
+function initThree() {
+  const canvas=document.getElementById('three-canvas');
+  const mv=document.getElementById('model-view');
+  const W2=mv.clientWidth, H2=mv.clientHeight;
+
+  R=new THREE.WebGLRenderer({canvas,antialias:true});
+  R.setPixelRatio(Math.min(devicePixelRatio,2));
+  R.setSize(W2,H2);
+  R.shadowMap.enabled=true;
+  R.shadowMap.type=THREE.PCFSoftShadowMap;
+  R.toneMapping=THREE.ACESFilmicToneMapping;
+  R.toneMappingExposure=1.1;
+
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x080807);
+  scene.fog=new THREE.FogExp2(0x080807,.005);
+
+  cam=new THREE.PerspectiveCamera(40,W2/H2,.5,800);
+  updateCam();
+
+  // Lighting
+  scene.add(new THREE.AmbientLight(0xfff8e8,.55));
+  const sun=new THREE.DirectionalLight(0xfff0b0,1.3);
+  sun.position.set(-55,100,55); sun.castShadow=true;
+  sun.shadow.mapSize.set(2048,2048);
+  sun.shadow.camera.left=-110; sun.shadow.camera.right=110;
+  sun.shadow.camera.top=110;   sun.shadow.camera.bottom=-110;
+  scene.add(sun);
+  const fill=new THREE.DirectionalLight(0xb0d0ff,.28);
+  fill.position.set(70,30,-50); scene.add(fill);
+  const bounce=new THREE.DirectionalLight(0xffe8c0,.12);
+  bounce.position.set(0,-20,0); scene.add(bounce);
+
+  // Ground plane
+  const gnd=new THREE.Mesh(new THREE.PlaneGeometry(400,400),
+    new THREE.MeshLambertMaterial({color:0x0e1008}));
+  gnd.rotation.x=-Math.PI/2; gnd.receiveShadow=true; scene.add(gnd);
+
+  buildScene();
+
+  // Legend
+  document.getElementById('mleg-wrap').innerHTML =
+    MAT_DEFS.map(l=>`<div class="mleg">
+      <div class="mleg-d" style="background:${l.hex}"></div>${l.label}</div>`).join('');
+
+  // Mouse
+  canvas.addEventListener('mousedown',e=>{drag=true;rDrag=e.button===2;lastM={x:e.clientX,y:e.clientY};e.preventDefault();});
+  canvas.addEventListener('mouseup',()=>drag=false);
+  canvas.addEventListener('mousemove',e=>{
+    if(!drag)return;
+    const dx=e.clientX-lastM.x, dy=e.clientY-lastM.y;
+    if(rDrag){pan.x-=dx*.07;pan.y+=dy*.07;}
+    else{sph.theta-=dx*.006;sph.phi=Math.max(.08,Math.min(Math.PI/2.05,sph.phi+dy*.006));}
+    lastM={x:e.clientX,y:e.clientY}; updateCam();
+  });
+  // Touch
+  let lastT=null;
+  canvas.addEventListener('touchstart',e=>{lastT=e.touches[0];},{passive:true});
+  canvas.addEventListener('touchmove',e=>{
+    if(!lastT)return;
+    const t=e.touches[0];
+    const dx=t.clientX-lastT.clientX, dy=t.clientY-lastT.clientY;
+    sph.theta-=dx*.006; sph.phi=Math.max(.08,Math.min(Math.PI/2.05,sph.phi+dy*.006));
+    lastT=t; updateCam(); e.preventDefault();
+  },{passive:false});
+  canvas.addEventListener('wheel',e=>{
+    sph.r=Math.max(30,Math.min(280,sph.r+e.deltaY*.1)); updateCam();
+  },{passive:true});
+  canvas.addEventListener('contextmenu',e=>e.preventDefault());
+  window.addEventListener('resize',resizeThree);
+
+  loop(); threeReady=true;
+}
+
+function loop() {
+  animId=requestAnimationFrame(loop);
+  if(autoRot){sph.theta+=.003;updateCam();}
+  R.render(scene,cam);
+}
+
+function resizeThree() {
+  if(!threeReady)return;
+  const mv=document.getElementById('model-view');
+  const W2=mv.clientWidth,H2=mv.clientHeight;
+  R.setSize(W2,H2); cam.aspect=W2/H2; cam.updateProjectionMatrix();
+}
+
+function tog3(k) {
+  vis[k]=!vis[k];
+  if(groups[k])groups[k].visible=vis[k];
+  document.getElementById('tog-'+k).classList.toggle('on',vis[k]);
+}
+
+function camReset(){sph={phi:1.05,theta:-0.6,r:140};pan={x:0,y:10};updateCam();}
+function camTop()  {sph.phi=.08;sph.r=160;updateCam();}
+function camSouth(){sph.theta=Math.PI;sph.phi=.9;sph.r=140;updateCam();}
+function camNorth(){sph.theta=0;sph.phi=.9;sph.r=140;updateCam();}
+function toggleWire(){wireMode=!wireMode;scene.traverse(o=>{if(o.isMesh&&o.material)o.material.wireframe=wireMode;});}
+function toggleAutoRot(){autoRot=!autoRot;document.getElementById('arot-btn').style.color=autoRot?'#c9922a':'#5a5040';}
+
+// ═══════════════════════════════════════════════════════════════
+//  VIEW SWITCHING & THEME
+// ═══════════════════════════════════════════════════════════════
+function showView(v) {
+  document.getElementById('fp-view').classList.toggle('on',v==='fp');
+  document.getElementById('model-view').classList.toggle('on',v==='3d');
+  document.getElementById('tab-fp').classList.toggle('on',v==='fp');
+  document.getElementById('tab-3d').classList.toggle('on',v==='3d');
+  if(v==='3d') {
+    if(!threeInited){threeInited=true;setTimeout(initThree,60);}
+    else if(threeReady) setTimeout(resizeThree,50);
+  }
+  if(v==='fp') renderFP();
+}
+
+let dark=true;
+function toggleTheme(){
+  dark=!dark;
+  document.body.style.background=dark?'#0f0e0a':'#f0ece2';
+  document.body.style.color=dark?'#e8e2d8':'#1a1610';
+  document.getElementById('fp-view').style.background=dark?'#0c0b08':'#f4f0e6';
+  if(scene) scene.background=new THREE.Color(dark?0x080807:0xeae6dc);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded',()=>{
+  renderFP();
+});
+window.addEventListener('resize',()=>{
+  if(document.getElementById('fp-view').classList.contains('on')) renderFP();
+});
+</script>
+</body>
+</html>
